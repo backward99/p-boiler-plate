@@ -6,6 +6,7 @@ const { User } =require('./models/User') ;
 const bodyParser = require('body-parser');
 const config = require('./config/key');
 const cookieParser = require('cookie-parser');
+const {auth} = require('./middleware/auth');
 
 //bodyparser로 분석해서 가져올 수 있게
 app.use(bodyParser.urlencoded({extended:true}));
@@ -23,7 +24,7 @@ app.get('/',(req,res)=>{
 })
 
 //bodyparser를 사용해서 req정보를 받아 올 수 있음
-app.post('/register', (req,res)=>{
+app.post('/api/users/register', (req,res)=>{
     const user = new User(req.body)
 
     user.save((err, doc)=>{
@@ -32,7 +33,7 @@ app.post('/register', (req,res)=>{
     })
 })
 
-app.post('/login', (req,res)=>{
+app.post('/api/users/login', (req,res)=>{
     User.findOne({ email: req.body.email},(err, userConfirm) => {
         if(!userConfirm) res.json({loginSuccess : false})
         
@@ -43,12 +44,25 @@ app.post('/login', (req,res)=>{
             userConfirm.ititToken((err, user)=>{
                 if(err) return res.status(400).send(err);
                 
-                res.cookie("new cookie",user.token).status(200)
+                res.cookie("new_cookie",user.token).status(200)
                 .json({loginSuccess: true, userId: user._id, message: "다 맞아서 토큰도 생성함"})
             })
         })
     })
 })
 
+
+app.get('/api.users/auth', auth, (req, res)=>{
+    res.status(200).json({
+        _id: req.user._id,
+        isAdmin: req.user.role == 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image
+    })
+})
 
 app.listen(port, ()=>console.log(`Example app listening on port ${port}!`));

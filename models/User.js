@@ -65,6 +65,16 @@ userSchema.methods.ititToken = function(callback){
     });
 }
 
+userSchema.methods.findByToken = function(token, callback){
+    var user = this;
+
+    jsonwebtoken.verify(token, 'everything', function(err, decoded){
+        user.findOne({ "_id": decoded, "token": token}, function(err, findUser){
+            if(err) return callback(err);
+            callback(null, findUser)
+        })
+    })
+}
 
 
 const User = mongoose.model('User', userSchema);
