@@ -20,6 +20,7 @@ mongoose.connect(config.mongoURI, {
 }).then(()=> console.log('몽고DB 연결 성공 ')).catch(err => console.log(err));
 
 app.get('/',(req,res)=>{
+    
     res.send("이번에는 두 번 실행되지 않기를...");
 })
 
@@ -63,6 +64,18 @@ app.get('/api.users/auth', auth, (req, res)=>{
         role: req.user.role,
         image: req.user.image
     })
+})
+//이렇게 가능한지 상은이한테 물어보기
+app.get('/api/users/logout',auth, (req, res)=>{
+    User.findOneAndUpdate({ _id: req.user._id},
+        {token: ""},
+        (err, user) =>{
+            if(err) return res.json({success:false, err});
+            return res.status(200).send({
+                logoutSuccess: true
+            })
+        }
+        )
 })
 
 app.listen(port, ()=>console.log(`Example app listening on port ${port}!`));

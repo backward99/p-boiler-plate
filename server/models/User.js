@@ -65,13 +65,13 @@ userSchema.methods.ititToken = function(callback){
     });
 }
 
-userSchema.methods.findByToken = function(token, callback){
+userSchema.statics.findByToken = function(token, callback){
     var user = this;
 
     jsonwebtoken.verify(token, 'everything', function(err, decoded){
-        user.findOne({ "_id": decoded, "token": token}, function(err, findUser){
+        user.findOne({ "_id": decoded, "token": token}, function(err, user){
             if(err) return callback(err);
-            callback(null, findUser)
+            callback(null, user)
         })
     })
 }
